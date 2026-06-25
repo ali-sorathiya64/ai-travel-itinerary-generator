@@ -90,7 +90,7 @@ const Register = () => {
               <label className="tc-label">Username</label>
               <div className="tc-input-wrap">
                 <svg className="tc-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <input name="userName" type="text" value={form.userName} onChange={handleChange} required placeholder="john_doe" className="tc-input"/>
+                <input name="userName" type="text" value={form.userName} onChange={handleChange} required placeholder="example_user" className="tc-input"/>
               </div>
             </div>
 
