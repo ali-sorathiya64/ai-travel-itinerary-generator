@@ -17,7 +17,7 @@ connectDb();
 app.use(cors({
     origin: [
         "http://localhost:5173",
-        "https://travel-itinerary-generator-ai.vercel.app"
+        "https://ai-travel-itinerary-generator-ist2.onrender.com/"
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
