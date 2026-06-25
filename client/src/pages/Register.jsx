@@ -83,7 +83,7 @@ const Register = () => {
           </div>
 
           <h1 className="tc-title">Create account</h1>
-          <p className="tc-sub">Free to start. No credit card needed.</p>
+          <p className="tc-sub">Free to start. Easy to use.</p>
 
           <form onSubmit={handleSubmit} className="tc-form">
             <div className="tc-field">
