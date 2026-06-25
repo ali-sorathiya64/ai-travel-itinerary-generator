@@ -15,13 +15,8 @@ const PORT = config.PORT;
 
 connectDb();
 app.use(cors({
-    origin: [
-        "http://localhost:5173",
-        "https://ai-travel-itinerary-generator-ist2.onrender.com/"
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true
+  origin: true,
+  credentials: true
 }));
 
 app.use(express.json());
