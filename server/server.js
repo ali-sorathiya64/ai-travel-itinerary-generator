@@ -14,9 +14,11 @@ const app = express();
 const PORT = config.PORT;
 
 connectDb();
-
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: [
+        "http://localhost:5173",
+        "https://travel-itinerary-generator-ai.vercel.app"
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
