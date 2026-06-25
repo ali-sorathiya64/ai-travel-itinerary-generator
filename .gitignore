@@ -1,0 +1,23 @@
+# Frontend
+client/node_modules/
+client/dist/
+client/build/
+
+# Backend
+server/node_modules/
+server/dist/
+server/build/
+
+# Environment files
+client/.env
+server/.env
+
+# Logs
+*.log
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
