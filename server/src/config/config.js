@@ -21,6 +21,9 @@ if(!process.env.GOOGLE_REFRESH_TOKEN){
 if(!process.env.GOOGLE_USER){
     throw new Error("Google user is not defined in the environment variable")
 }
+if(!process.env.GOOGLE_APP_PASSWORD){
+    throw new Error("Google app password is not defined in the environment variable")
+}
 
 const config ={
     PORT :process.env.PORT,
@@ -29,7 +32,8 @@ const config ={
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     GOOGLE_REFRESH_TOKEN: process.env.GOOGLE_REFRESH_TOKEN,
-    GOOGLE_USER: process.env.GOOGLE_USER
+    GOOGLE_USER: process.env.GOOGLE_USER,
+    GOOGLE_APP_PASSWORD: process.env.GOOGLE_APP_PASSWORD
 
 }
 
