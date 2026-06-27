@@ -38,151 +38,212 @@ const ItineraryDetail = () => {
     toast.success("Share link copied!");
   };
 
-  const handleDownloadPDF = () => {
-    if (!item) return;
-    setDownloading(true);
-    try {
-      const data = item.itinerary || {};
-      const { title, flight, hotel, summary, confidence, raw } = data;
+ const handleDownloadPDF = () => {
+  if (!item) return;
+  setDownloading(true);
+  try {
+    const data = item.itinerary || {};
+    const { title, flight, hotel, summary, confidence, raw } = data;
 
-      const doc = new jsPDF({ unit: "pt", format: "a4" });
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const margin = 50;
-      const maxWidth = pageWidth - margin * 2;
-      let y = 60;
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 48;
+    const maxWidth = pageWidth - margin * 2;
+    let y = 0;
 
-      const addSpacing = (amount = 20) => { y += amount; };
-      const checkPageBreak = (neededHeight = 20) => {
-        const pageHeight = doc.internal.pageSize.getHeight();
-        if (y + neededHeight > pageHeight - margin) {
-          doc.addPage();
-          y = 60;
-        }
-      };
-
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(20);
-      doc.setTextColor(30, 30, 30);
-      doc.text(title || "AI Trip Itinerary", margin, y);
-      addSpacing(20);
-
-      if (item.createdAt) {
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
-        doc.setTextColor(120, 120, 120);
-        doc.text(
-          format(new Date(item.createdAt), "dd MMM yyyy, hh:mm a"),
-          margin,
-          y
-        );
-        addSpacing(20);
+    const checkPageBreak = (needed = 24) => {
+      if (y + needed > pageHeight - 48) {
+        doc.addPage();
+        y = 48;
       }
+    };
 
-      if (typeof confidence === "number") {
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(11);
-        doc.setTextColor(34, 139, 34);
-        doc.text(`Confidence: ${Math.round(confidence * 100)}%`, margin, y);
-        addSpacing(25);
-      }
+    // ── HEADER BANNER ──────────────────────────────────────────────
+    // Deep indigo → cyan gradient (simulated with a rect + overlay)
+    doc.setFillColor(79, 70, 229); // indigo-600
+    doc.rect(0, 0, pageWidth, 140, "F");
+
+    // Decorative circles
+    doc.setFillColor(255, 255, 255);
+    doc.setGState(new doc.GState({ opacity: 0.06 }));
+    doc.circle(pageWidth - 30, -20, 90, "F");
+    doc.circle(pageWidth - 90, 110, 55, "F");
+    doc.setGState(new doc.GState({ opacity: 1 }));
+
+    // "AI TRIP ITINERARY" pill badge
+    doc.setFillColor(255, 255, 255);
+    doc.setGState(new doc.GState({ opacity: 0.18 }));
+    doc.roundedRect(margin, 22, 130, 18, 9, 9, "F");
+    doc.setGState(new doc.GState({ opacity: 1 }));
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(255, 255, 255);
+    doc.text("AI TRIP ITINERARY", margin + 14, 34);
+
+    // Title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(255, 255, 255);
+    doc.text(title || "My Trip", margin, 68);
+
+    // Meta line
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(200, 210, 255);
+    const metaParts = [];
+    if (item.createdAt) metaParts.push(format(new Date(item.createdAt), "dd MMM yyyy, hh:mm a"));
+    if (typeof confidence === "number") metaParts.push(`Confidence: ${Math.round(confidence * 100)}%`);
+    doc.text(metaParts.join("   ·   "), margin, 88);
+
+    y = 160;
+
+    // ── FLIGHT + HOTEL CARDS (side by side) ─────────────────────────
+    if (flight || hotel) {
+      const cardW = (maxWidth - 14) / 2;
+      const cardH = 68;
 
       if (flight) {
-        checkPageBreak(40);
+        // Flight card background
+        doc.setFillColor(240, 244, 255);
+        doc.roundedRect(margin, y, cardW, cardH, 8, 8, "F");
+        // Left accent bar
+        doc.setFillColor(79, 70, 229);
+        doc.roundedRect(margin, y, 4, cardH, 2, 2, "F");
+        // Label
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.setTextColor(79, 70, 229);
+        doc.text("FLIGHT", margin + 14, y + 18);
+        // Value
+        const flightText = typeof flight === "object"
+          ? `${flight.departure || "?"} → ${flight.arrival || "?"}`
+          : String(flight);
         doc.setFont("helvetica", "bold");
         doc.setFontSize(13);
-        doc.setTextColor(79, 70, 229);
-        doc.text("Flight", margin, y);
-        addSpacing(18);
-
-        const flightText =
-          typeof flight === "object"
-            ? `${flight.departure || "Unknown"} -> ${flight.arrival || "Unknown"}`
-            : String(flight);
-
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(11);
-        doc.setTextColor(40, 40, 40);
-        const flightLines = doc.splitTextToSize(flightText, maxWidth);
-        doc.text(flightLines, margin, y);
-        addSpacing(flightLines.length * 14 + 15);
+        doc.setTextColor(26, 26, 46);
+        const flightLines = doc.splitTextToSize(flightText, cardW - 20);
+        doc.text(flightLines[0], margin + 14, y + 36);
+        if (flightLines[1]) {
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10);
+          doc.setTextColor(100, 100, 130);
+          doc.text(flightLines[1], margin + 14, y + 50);
+        }
       }
 
       if (hotel) {
-        checkPageBreak(40);
+        const hx = margin + cardW + 14;
+        // Hotel card background
+        doc.setFillColor(240, 250, 245);
+        doc.roundedRect(hx, y, cardW, cardH, 8, 8, "F");
+        // Left accent bar
+        doc.setFillColor(16, 185, 129);
+        doc.roundedRect(hx, y, 4, cardH, 2, 2, "F");
+        // Label
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.setTextColor(5, 150, 105);
+        doc.text("HOTEL", hx + 14, y + 18);
+        // Value
+        const hotelText = typeof hotel === "object" ? hotel.name || "Unknown" : String(hotel);
         doc.setFont("helvetica", "bold");
         doc.setFontSize(13);
-        doc.setTextColor(79, 70, 229);
-        doc.text("Hotel", margin, y);
-        addSpacing(18);
-
-        const hotelText =
-          typeof hotel === "object" ? hotel.name || "Unknown" : String(hotel);
-
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(11);
-        doc.setTextColor(40, 40, 40);
-        const hotelLines = doc.splitTextToSize(hotelText, maxWidth);
-        doc.text(hotelLines, margin, y);
-        addSpacing(hotelLines.length * 14 + 15);
+        doc.setTextColor(26, 26, 46);
+        const hotelLines = doc.splitTextToSize(hotelText, cardW - 20);
+        doc.text(hotelLines[0], hx + 14, y + 36);
+        if (hotelLines[1]) {
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10);
+          doc.setTextColor(100, 130, 110);
+          doc.text(hotelLines[1], hx + 14, y + 50);
+        }
       }
 
-      if (summary) {
-        checkPageBreak(40);
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(13);
-        doc.setTextColor(50, 50, 50);
-        doc.text("Summary", margin, y);
-        addSpacing(18);
-
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(11);
-        doc.setTextColor(60, 60, 60);
-        const summaryLines = doc.splitTextToSize(String(summary), maxWidth);
-
-        summaryLines.forEach((line) => {
-          checkPageBreak(16);
-          doc.text(line, margin, y);
-          y += 14;
-        });
-        addSpacing(15);
-      }
-
-      if (raw) {
-        checkPageBreak(40);
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(12);
-        doc.setTextColor(50, 50, 50);
-        doc.text("Additional Details", margin, y);
-        addSpacing(16);
-
-        const rawText =
-          typeof raw === "object" ? JSON.stringify(raw, null, 2) : String(raw);
-
-        doc.setFont("courier", "normal");
-        doc.setFontSize(9);
-        doc.setTextColor(80, 80, 80);
-        const rawLines = doc.splitTextToSize(rawText, maxWidth);
-
-        rawLines.forEach((line) => {
-          checkPageBreak(12);
-          doc.text(line, margin, y);
-          y += 12;
-        });
-      }
-
-      const safeTitle = (title || "itinerary")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
-
-      doc.save(`${safeTitle || "itinerary"}.pdf`);
-      toast.success("PDF downloaded!");
-    } catch (error) {
-      toast.error("Could not generate PDF");
-    } finally {
-      setDownloading(false);
+      y += cardH + 28;
     }
-  };
+
+    // ── DASHED DIVIDER ───────────────────────────────────────────────
+    const drawDivider = () => {
+      doc.setDrawColor(220, 220, 230);
+      doc.setLineDashPattern([4, 4], 0);
+      doc.line(margin, y, pageWidth - margin, y);
+      doc.setLineDashPattern([], 0);
+      y += 22;
+    };
+
+    // ── SUMMARY SECTION ──────────────────────────────────────────────
+    if (summary) {
+      checkPageBreak(60);
+      drawDivider();
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(136, 136, 160);
+      doc.text("SUMMARY", margin, y);
+      y += 14;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(60, 60, 80);
+      const summaryLines = doc.splitTextToSize(String(summary), maxWidth);
+      summaryLines.forEach((line) => {
+        checkPageBreak(16);
+        doc.text(line, margin, y);
+        y += 15;
+      });
+      y += 10;
+    }
+
+    // ── RAW / ADDITIONAL DETAILS ─────────────────────────────────────
+    if (raw) {
+      checkPageBreak(60);
+      drawDivider();
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(136, 136, 160);
+      doc.text("ADDITIONAL DETAILS", margin, y);
+      y += 14;
+
+      const rawText = typeof raw === "object" ? JSON.stringify(raw, null, 2) : String(raw);
+      doc.setFont("courier", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(90, 90, 110);
+      const rawLines = doc.splitTextToSize(rawText, maxWidth);
+      rawLines.forEach((line) => {
+        checkPageBreak(12);
+        doc.text(line, margin, y);
+        y += 11;
+      });
+    }
+
+    // ── FOOTER ────────────────────────────────────────────────────────
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      const footerY = pageHeight - 28;
+      doc.setDrawColor(220, 220, 230);
+      doc.line(margin, footerY - 8, pageWidth - margin, footerY - 8);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(180, 180, 200);
+      doc.text("Generated by AI Trip Planner", margin, footerY);
+      doc.text(`Page ${i} of ${totalPages}`, pageWidth - margin, footerY, { align: "right" });
+    }
+
+    const safeTitle = (title || "itinerary")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
+    doc.save(`${safeTitle}.pdf`);
+    toast.success("PDF downloaded!");
+  } catch (error) {
+    console.error(error);
+    toast.error("Could not generate PDF");
+  } finally {
+    setDownloading(false);
+  }
+};
 
   if (loading) {
     return (
