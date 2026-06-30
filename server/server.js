@@ -15,6 +15,7 @@ const PORT = config.PORT;
 
 connectDb();
 
+
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000", "https://ai-travel-itinerary-generator-project.onrender.com",
