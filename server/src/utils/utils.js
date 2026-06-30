@@ -11,6 +11,4 @@ export function getOtpHtml(otp){
         <p style="font-size: 14px; color: #999;">This OTP is valid for 10 minutes.</p>
     </div>
     `
-
-
 }
