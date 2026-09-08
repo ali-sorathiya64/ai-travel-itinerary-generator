@@ -24,8 +24,7 @@ console.log("Cloudinary working:", result);
 
 }catch(error){
 
-console.log("Cloudinary error:", error.message);
-
+console.log("Cloudinary Error:", error.message);
 }
 
 }
