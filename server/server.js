@@ -8,8 +8,6 @@ import authRouter from "./src/routes/auth.route.js";
 import irouter from "./src/routes/itinerary.routes.js"
 import cors from "cors"
 
-
-
 dotenv.config();
 
 const app = express();
