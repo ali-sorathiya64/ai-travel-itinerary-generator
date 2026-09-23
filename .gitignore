@@ -11,6 +11,7 @@ server/build/
 # Environment files
 client/.env
 server/.env
+server/.env.example
 
 # Logs
 *.log
