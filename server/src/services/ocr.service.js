@@ -12,7 +12,6 @@ export const extractImageText = async(path)=>{
         result.data.text
     );
 
-
     return result.data.text;
 
 
