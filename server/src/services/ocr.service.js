@@ -6,8 +6,7 @@ export const extractImageText = async(path)=>{
         path,
         "eng"
     );
-
-    console.log(
+ console.log(
         "TEXT FROM IMAGE:",
         result.data.text
     );
